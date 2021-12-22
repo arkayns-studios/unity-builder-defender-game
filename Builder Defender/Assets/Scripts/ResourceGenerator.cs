@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ResourceGenerator : MonoBehaviour {
 
     private BuildingTypeSO buildingType;
     private float timer;
     private float timerMax;
+    private int iteration = 0;
 
     private void Awake () {
         buildingType = GetComponent<BuildingTypeHolder> ().buildingType;
@@ -16,8 +15,9 @@ public class ResourceGenerator : MonoBehaviour {
     private void Update () {
         timer -= Time.deltaTime;
         if(timer <= 0f) {
-            timer += timerMax;
-            ResourceManager.Instance.AddResource (buildingType.resourceGeneratorData.resourceType, 1);
+            iteration++;
+            timer = timerMax;
+            ResourceManager.Instance.AddResource (buildingType.resourceGeneratorData.resourceType, iteration);
         }
     } // Update
 
