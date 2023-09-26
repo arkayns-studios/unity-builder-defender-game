@@ -10,7 +10,8 @@ public class BuildingManager : MonoBehaviour {
     private BuildingTypeListSO buildingTypeList;
     private BuildingTypeSO activeBuildingType;
     private Camera mainCamera;
-
+    private int cooldown = 30;
+    
     // -- Events --
     public event EventHandler<OnActiveBuildingTypeChangedEventArgs> OnActiveBuildingTypeChanged;
     
@@ -33,8 +34,12 @@ public class BuildingManager : MonoBehaviour {
     } // Start
 
     private void Update () {
+        if (cooldown is < 30 and >= 0) cooldown++;
         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
-            if(activeBuildingType != null) Instantiate (activeBuildingType.prefab, Utils.GetMouseWorldPosition (), Quaternion.identity);
+            if (activeBuildingType != null && cooldown == 30) {
+                Instantiate (activeBuildingType.prefab, Utils.GetMouseWorldPosition (), Quaternion.identity);
+                cooldown = 0;
+            }
         }
     } // Update
     

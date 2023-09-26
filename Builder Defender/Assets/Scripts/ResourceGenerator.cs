@@ -1,23 +1,48 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ResourceGenerator : MonoBehaviour {
 
-    private BuildingTypeSO buildingType;
+    // -- Variables --
+    private ResourceGeneratorData resourceGeneratorData;
     private float timer;
     private float timerMax;
-    private int iteration = 0;
+    private int iteration;
 
+    // -- Built-In Methods --
     private void Awake () {
-        buildingType = GetComponent<BuildingTypeHolder> ().buildingType;
-        timerMax = buildingType.resourceGeneratorData.timerMax;
+        resourceGeneratorData = GetComponent<BuildingTypeHolder>().buildingType.resourceGeneratorData;
+        timerMax = resourceGeneratorData.timerMax;
     } // Awake
+ 
+    private void Start() {
+        var colliderArray = Physics2D.OverlapCircleAll(transform.position, resourceGeneratorData.detectionRadius);
+        var nearbyNodes = 0;
+        foreach (var collider in colliderArray) {
+            var resourceNode = collider.GetComponent<ResourceNode>();
+            if (resourceNode != null) {
+                if(resourceNode.resource == resourceGeneratorData.resourceType) nearbyNodes++;
+            }
+        }
+
+        nearbyNodes = Mathf.Clamp(nearbyNodes, 0, resourceGeneratorData.maxResourceAmount);
+        if (nearbyNodes == 0) {
+            enabled = false;
+        }
+        else {
+            timerMax = (resourceGeneratorData.timerMax / 2F) + 
+                       resourceGeneratorData.timerMax * 
+                       (1 - (float)nearbyNodes / resourceGeneratorData.maxResourceAmount);
+        }
+    } // Start ()
 
     private void Update () {
         timer -= Time.deltaTime;
-        if(timer <= 0f) {
-            iteration++;
-            timer = timerMax;
-            ResourceManager.Instance.AddResource (buildingType.resourceGeneratorData.resourceType, iteration);
+        if(timer <= 0F) {
+            //iteration++;
+            //timer = timerMax;
+            timer += timerMax;
+            ResourceManager.Instance.AddResource (resourceGeneratorData.resourceType, 1);
         }
     } // Update
 
