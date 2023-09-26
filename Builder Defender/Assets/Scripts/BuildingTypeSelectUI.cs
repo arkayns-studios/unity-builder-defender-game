@@ -4,23 +4,25 @@ using UnityEngine.UI;
 
 public class BuildingTypeSelectUI : MonoBehaviour {
 
+    // -- Variables --
     [SerializeField] private Sprite arrowSprite;
     private Dictionary<BuildingTypeSO, Transform> btnTransformDictionary;
     private Transform arrowBtn;
 
+    // -- Built-In Methods --
     private void Awake () {
-        Transform template = transform.Find ("Building Template");
+        var template = transform.Find ("Building Template");
         template.gameObject.SetActive (false);
 
-        BuildingTypeListSO buildingTypeList = Resources.Load<BuildingTypeListSO> (typeof (BuildingTypeListSO).Name);
+        var buildingTypeList = Resources.Load<BuildingTypeListSO> (nameof(BuildingTypeListSO));
         btnTransformDictionary = new Dictionary<BuildingTypeSO, Transform> ();
 
-        int index = 0;
+        var index = 0;
 
         arrowBtn = Instantiate (template, transform);
         arrowBtn.gameObject.SetActive (true);
 
-        float offsetAmount = 130f;
+        var offsetAmount = 130f;
         arrowBtn.GetComponent<RectTransform> ().anchoredPosition = new Vector2 (offsetAmount * index, 0);
 
         arrowBtn.Find ("Image").GetComponent<Image> ().sprite = arrowSprite;
@@ -32,8 +34,8 @@ public class BuildingTypeSelectUI : MonoBehaviour {
 
         index++;
 
-        foreach (BuildingTypeSO buildingType in buildingTypeList.list) {
-            Transform btnTransform = Instantiate (template, transform);
+        foreach (var buildingType in buildingTypeList.list) {
+            var btnTransform = Instantiate (template, transform);
             btnTransform.gameObject.SetActive (true);
 
             offsetAmount = 130f;
@@ -52,22 +54,26 @@ public class BuildingTypeSelectUI : MonoBehaviour {
 
     } // Awake
 
-    private void Update () {
-        UpdateActiveBuildingTypeButton ();
-    } // Update
+    private void Start() {
+        BuildingManager.Instance.OnActiveBuildingTypeChanged += BuildingManager_OnActiveBuildingTypeChanged;
+        UpdateActiveBuildingTypeButton();
+    } // Start ()
 
+    // -- Custom Methods --
     private void UpdateActiveBuildingTypeButton () {
         arrowBtn.Find("Selected").gameObject.SetActive (false);
-        foreach (BuildingTypeSO buildingType in btnTransformDictionary.Keys) {
-            Transform btnTransform = btnTransformDictionary [buildingType];
+        foreach (var buildingType in btnTransformDictionary.Keys) {
+            var btnTransform = btnTransformDictionary [buildingType];
             btnTransform.Find ("Selected").gameObject.SetActive(false);
         }
 
-        BuildingTypeSO activeBuildingType = BuildingManager.Instance.GetActiveBuildingType ();
-        if(activeBuildingType == null)
-            arrowBtn.Find("Selected").gameObject.SetActive (true);
-        else
-            btnTransformDictionary [activeBuildingType].Find ("Selected").gameObject.SetActive (true);
+        var activeBuildingType = BuildingManager.Instance.GetActiveBuildingType ();
+        if(activeBuildingType == null) arrowBtn.Find("Selected").gameObject.SetActive (true);
+        else btnTransformDictionary [activeBuildingType].Find ("Selected").gameObject.SetActive (true);
     } // UpdateActiveBuildingTypeButton
 
+    private void BuildingManager_OnActiveBuildingTypeChanged(object _sender, BuildingManager.OnActiveBuildingTypeChangedEventArgs _e) {
+        UpdateActiveBuildingTypeButton();
+    } // BuildingManager_OnActiveBuildingTypeChanged ()
+    
 } // Class BuildingTypeSelectUI
